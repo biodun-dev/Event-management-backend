@@ -19,7 +19,6 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const mailer_1 = require("../utilis/mailer");
 const smsSender_1 = require("../utilis/smsSender");
 const generateOTP_1 = require("../utilis/generateOTP");
-// Step 1: Save phone number and initiate registration
 const initiateRegistration = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { phoneNumber } = req.body;
     try {
@@ -158,7 +157,7 @@ const completeProfileRegistration = (req, res) => __awaiter(void 0, void 0, void
         user.firstName = firstName;
         user.lastName = lastName;
         user.nccCentre = nccCentre;
-        user.registrationComplete = true; // Assuming this is the last step of the registration
+        user.registrationComplete = true;
         yield user.save();
         res.status(200).json({ message: 'Profile registration complete.' });
     }

@@ -2,9 +2,9 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = require("mongoose");
 const UserSchema = new mongoose_1.Schema({
-    firstName: { type: String, required: true }, // New field for first name
-    lastName: { type: String, required: true }, // New field for last name
-    nccCentre: { type: String, required: true }, // New field for NCC Centre
+    firstName: { type: String }, // Now optional
+    lastName: { type: String }, // Now optional
+    nccCentre: { type: String }, // Now optional
     username: { type: String },
     email: { type: String, unique: true, sparse: true },
     password: { type: String },

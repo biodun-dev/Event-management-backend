@@ -1,9 +1,9 @@
 import { Schema, model, Document } from 'mongoose';
 
 interface IUser extends Document {
-  firstName: string;  // New field for first name
-  lastName: string;   // New field for last name
-  nccCentre: string;  // New field for NCC Centre
+  firstName?: string;
+  lastName?: string;
+  nccCentre?: string;
   username?: string;
   email?: string;
   password?: string;
@@ -12,11 +12,10 @@ interface IUser extends Document {
   otpExpires: Date | null;
   registrationComplete?: boolean;
 }
-
 const UserSchema = new Schema({
-  firstName: { type: String, required: true }, // New field for first name
-  lastName: { type: String, required: true },  // New field for last name
-  nccCentre: { type: String, required: true }, // New field for NCC Centre
+  firstName: { type: String }, // Now optional
+  lastName: { type: String }, // Now optional
+  nccCentre: { type: String }, // Now optional
   username: { type: String },
   email: { type: String, unique: true, sparse: true },
   password: { type: String },
@@ -26,4 +25,6 @@ const UserSchema = new Schema({
   registrationComplete: { type: Boolean, default: false },
 }, { timestamps: true });
 
+
 export default model<IUser>('User', UserSchema);
+
