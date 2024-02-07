@@ -17,24 +17,41 @@ interface IUser {
   }
   const initiateRegistration = async (req: Request, res: Response) => {
     const { phoneNumber } = req.body;
+  
+    // Basic validation to ensure phoneNumber is provided
+    if (!phoneNumber) {
+      return res.status(400).json({ message: 'Phone number is required' });
+    }
+  
     try {
       let user = await UserModel.findOne({ phoneNumber });
+  
+      // Check if the phone number is already registered
       if (user) {
         return res.status(400).json({ message: 'Phone number already registered' });
       }
+  
       // Create a user with just the phone number
       user = new UserModel({ phoneNumber });
       await user.save();
+  
+      // Successfully registered the phone number
       res.status(201).json({ message: 'Phone number registered, proceed to enter email' });
     } catch (error) {
       console.error(error);
       res.status(500).json({ message: 'Server error' });
     }
   };
+  
 
 // Step 2: Add email to user and request OTP
 const addEmailAndRequestOTP = async (req: Request, res: Response) => {
   const { phoneNumber, email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: 'Email is required' });
+  }
+
   try {
     let user = await UserModel.findOne({ phoneNumber });
     if (!user) {
@@ -43,7 +60,10 @@ const addEmailAndRequestOTP = async (req: Request, res: Response) => {
     if (user.email) {
       return res.status(400).json({ message: 'Email already added, request OTP directly' });
     }
-    user.email = email;
+
+    // Set the email only if it's provided, otherwise, skip setting it to avoid null values
+    user.email = email.trim(); // Ensure we don't just have whitespace
+
     const otp = generateOTP();
     const otpExpires = new Date();
     otpExpires.setMinutes(otpExpires.getMinutes() + 10);
@@ -73,7 +93,7 @@ const verifyOTPAndSetPassword = async (req: Request, res: Response) => {
     user.otp = null;
     user.otpExpires = null;
     await user.save();
-    res.status(200).json({ message: 'Password set successfully, user registration complete.' });
+    res.status(200).json({ message: 'Password set successfully.' });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error' });

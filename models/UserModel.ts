@@ -12,10 +12,11 @@ interface IUser extends Document {
   otpExpires: Date | null;
   registrationComplete?: boolean;
 }
+
 const UserSchema = new Schema({
-  firstName: { type: String }, // Now optional
-  lastName: { type: String }, // Now optional
-  nccCentre: { type: String }, // Now optional
+  firstName: { type: String },
+  lastName: { type: String },
+  nccCentre: { type: String },
   username: { type: String },
   email: { type: String, unique: true, sparse: true },
   password: { type: String },
@@ -25,6 +26,6 @@ const UserSchema = new Schema({
   registrationComplete: { type: Boolean, default: false },
 }, { timestamps: true });
 
-
 export default model<IUser>('User', UserSchema);
+
 

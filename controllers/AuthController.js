@@ -21,14 +21,20 @@ const smsSender_1 = require("../utilis/smsSender");
 const generateOTP_1 = require("../utilis/generateOTP");
 const initiateRegistration = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { phoneNumber } = req.body;
+    // Basic validation to ensure phoneNumber is provided
+    if (!phoneNumber) {
+        return res.status(400).json({ message: 'Phone number is required' });
+    }
     try {
         let user = yield UserModel_1.default.findOne({ phoneNumber });
+        // Check if the phone number is already registered
         if (user) {
             return res.status(400).json({ message: 'Phone number already registered' });
         }
         // Create a user with just the phone number
         user = new UserModel_1.default({ phoneNumber });
         yield user.save();
+        // Successfully registered the phone number
         res.status(201).json({ message: 'Phone number registered, proceed to enter email' });
     }
     catch (error) {
@@ -40,6 +46,9 @@ exports.initiateRegistration = initiateRegistration;
 // Step 2: Add email to user and request OTP
 const addEmailAndRequestOTP = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { phoneNumber, email } = req.body;
+    if (!email) {
+        return res.status(400).json({ message: 'Email is required' });
+    }
     try {
         let user = yield UserModel_1.default.findOne({ phoneNumber });
         if (!user) {
@@ -48,7 +57,8 @@ const addEmailAndRequestOTP = (req, res) => __awaiter(void 0, void 0, void 0, fu
         if (user.email) {
             return res.status(400).json({ message: 'Email already added, request OTP directly' });
         }
-        user.email = email;
+        // Set the email only if it's provided, otherwise, skip setting it to avoid null values
+        user.email = email.trim(); // Ensure we don't just have whitespace
         const otp = (0, generateOTP_1.generateOTP)();
         const otpExpires = new Date();
         otpExpires.setMinutes(otpExpires.getMinutes() + 10);
