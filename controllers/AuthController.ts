@@ -149,4 +149,32 @@ const login = async (req: Request, res: Response) => {
       res.status(500).json({ message: 'Server error' });
     }
   };
-export {  login, resendOTP, initiateRegistration, addEmailAndRequestOTP, verifyOTPAndSetPassword };
+  // Step 4: Complete Profile Registration
+const completeProfileRegistration = async (req: Request, res: Response) => {
+  const { phoneNumber, firstName, lastName, nccCentre } = req.body;
+  try {
+    let user = await UserModel.findOne({ phoneNumber });
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+    if (user.registrationComplete) {
+      return res.status(400).json({ message: 'User profile already completed' });
+    }
+    // Update the user profile with the additional fields
+    user.firstName = firstName;
+    user.lastName = lastName;
+    user.nccCentre = nccCentre;
+    user.registrationComplete = true; // Assuming this is the last step of the registration
+    await user.save();
+    
+    res.status(200).json({ message: 'Profile registration complete.' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
+
+
+  
+export {  login, resendOTP, initiateRegistration, addEmailAndRequestOTP, verifyOTPAndSetPassword,completeProfileRegistration };

@@ -1,23 +1,29 @@
 import { Schema, model, Document } from 'mongoose';
 
 interface IUser extends Document {
-  username?: string; // Optional if username is not required at initial registration
-  email?: string; // Make email optional as it will be added later
-  password?: string; // Make password optional as it will be set at the end of the registration process
-  phoneNumber: string; // Required from the start
+  firstName: string;  // New field for first name
+  lastName: string;   // New field for last name
+  nccCentre: string;  // New field for NCC Centre
+  username?: string;
+  email?: string;
+  password?: string;
+  phoneNumber: string;
   otp: string | null;
   otpExpires: Date | null;
-  registrationComplete?: boolean; // Optional field to track if registration is complete
+  registrationComplete?: boolean;
 }
 
 const UserSchema = new Schema({
-  username: { type: String }, // Removed the required constraint
-  email: { type: String, unique: true, sparse: true }, // Made unique but not required; sparse index for optional unique field
-  password: { type: String }, // Removed the required constraint
-  phoneNumber: { type: String, required: true, unique: true }, // Ensured phone number is unique
+  firstName: { type: String, required: true }, // New field for first name
+  lastName: { type: String, required: true },  // New field for last name
+  nccCentre: { type: String, required: true }, // New field for NCC Centre
+  username: { type: String },
+  email: { type: String, unique: true, sparse: true },
+  password: { type: String },
+  phoneNumber: { type: String, required: true, unique: true },
   otp: { type: String, default: null },
   otpExpires: { type: Date, default: null },
-  registrationComplete: { type: Boolean, default: false }, // Track if user has completed all registration steps
-}, { timestamps: true }); // Add timestamps for creation and update actions
+  registrationComplete: { type: Boolean, default: false },
+}, { timestamps: true });
 
 export default model<IUser>('User', UserSchema);

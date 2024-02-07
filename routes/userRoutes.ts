@@ -4,7 +4,8 @@ import authenticateToken from '../middleware/authenticateToken';
 import {
   initiateRegistration,
   addEmailAndRequestOTP,
-  verifyOTPAndSetPassword,login,resendOTP
+  verifyOTPAndSetPassword,login,resendOTP,
+  completeProfileRegistration 
 } from '../controllers/AuthController'; // Adjusted import to match the new function names
 
 const router = express.Router();
@@ -19,12 +20,13 @@ router.post('/add-email-request-otp', addEmailAndRequestOTP);
 router.post('/verify-otp-set-password', verifyOTPAndSetPassword);
 
 // Assuming you have a login route for after the user has completed registration
-router.post('/login', login);
+router.post('/login',authenticateToken, login);
 
 // Assuming the verifyOTP and resendOTP functions are part of the registration or account recovery process
 // and adjusting their usage according to the new process if needed
 // Example protected route to resend OTP if the first one expires, requires authentication
-router.post('/resend-otp', authenticateToken, resendOTP);
+router.post('/resend-otp', resendOTP);
+router.post('/complete-profile-registration', completeProfileRegistration);
 
 export default router;
 

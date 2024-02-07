@@ -12,7 +12,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.verifyOTPAndSetPassword = exports.addEmailAndRequestOTP = exports.initiateRegistration = exports.resendOTP = exports.login = void 0;
+exports.completeProfileRegistration = exports.verifyOTPAndSetPassword = exports.addEmailAndRequestOTP = exports.initiateRegistration = exports.resendOTP = exports.login = void 0;
 const UserModel_1 = __importDefault(require("../models/UserModel"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
 const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
@@ -143,3 +143,28 @@ const resendOTP = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     }
 });
 exports.resendOTP = resendOTP;
+// Step 4: Complete Profile Registration
+const completeProfileRegistration = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { phoneNumber, firstName, lastName, nccCentre } = req.body;
+    try {
+        let user = yield UserModel_1.default.findOne({ phoneNumber });
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+        if (user.registrationComplete) {
+            return res.status(400).json({ message: 'User profile already completed' });
+        }
+        // Update the user profile with the additional fields
+        user.firstName = firstName;
+        user.lastName = lastName;
+        user.nccCentre = nccCentre;
+        user.registrationComplete = true; // Assuming this is the last step of the registration
+        yield user.save();
+        res.status(200).json({ message: 'Profile registration complete.' });
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+exports.completeProfileRegistration = completeProfileRegistration;
