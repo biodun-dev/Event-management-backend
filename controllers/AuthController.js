@@ -89,7 +89,7 @@ const verifyOTPAndSetPassword = (req, res) => __awaiter(void 0, void 0, void 0, 
         user.otp = null;
         user.otpExpires = null;
         yield user.save();
-        res.status(200).json({ message: 'Password set successfully, user registration complete.' });
+        res.status(200).json({ message: 'Password set successfully.' });
     }
     catch (error) {
         console.error(error);
@@ -154,7 +154,7 @@ const resendOTP = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
 exports.resendOTP = resendOTP;
 // Step 4: Complete Profile Registration
 const completeProfileRegistration = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { phoneNumber, firstName, lastName, nccCentre } = req.body;
+    const { phoneNumber, firstName, lastName, nccCentre, sex, dob } = req.body; // Include sex and dob
     try {
         let user = yield UserModel_1.default.findOne({ phoneNumber });
         if (!user) {
@@ -167,6 +167,8 @@ const completeProfileRegistration = (req, res) => __awaiter(void 0, void 0, void
         user.firstName = firstName;
         user.lastName = lastName;
         user.nccCentre = nccCentre;
+        user.sex = sex; // Update sex
+        user.dob = dob; // Update dob
         user.registrationComplete = true;
         yield user.save();
         res.status(200).json({ message: 'Profile registration complete.' });

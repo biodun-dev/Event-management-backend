@@ -169,7 +169,7 @@ const login = async (req: Request, res: Response) => {
   };
   // Step 4: Complete Profile Registration
   const completeProfileRegistration = async (req: Request, res: Response) => {
-    const { phoneNumber, firstName, lastName, nccCentre } = req.body;
+    const { phoneNumber, firstName, lastName, nccCentre, sex, dob } = req.body; // Include sex and dob
     try {
       let user = await UserModel.findOne({ phoneNumber });
       if (!user) {
@@ -182,6 +182,8 @@ const login = async (req: Request, res: Response) => {
       user.firstName = firstName;
       user.lastName = lastName;
       user.nccCentre = nccCentre;
+      user.sex = sex; // Update sex
+      user.dob = dob; // Update dob
       user.registrationComplete = true;
       await user.save();
       
@@ -190,7 +192,7 @@ const login = async (req: Request, res: Response) => {
       console.error(error);
       res.status(500).json({ message: 'Server error' });
     }
-  };
+};
 
 
 

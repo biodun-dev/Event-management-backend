@@ -11,6 +11,8 @@ interface IUser extends Document {
   otp: string | null;
   otpExpires: Date | null;
   registrationComplete?: boolean;
+  sex?: string; // Added field for sex
+  dob?: Date; // Added field for date of birth
 }
 
 const UserSchema = new Schema({
@@ -24,8 +26,8 @@ const UserSchema = new Schema({
   otp: { type: String, default: null },
   otpExpires: { type: Date, default: null },
   registrationComplete: { type: Boolean, default: false },
+  sex: { type: String }, // Field for sex
+  dob: { type: Date }, // Field for date of birth
 }, { timestamps: true });
 
 export default model<IUser>('User', UserSchema);
-
-
