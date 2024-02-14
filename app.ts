@@ -7,6 +7,7 @@ import adminRoutes from './routes/adminRoutes';
 import uploadProfile from './routes/uploadRoutes';
 import { createPermanentAdminUser } from './controllers/UserController';
 
+
 dotenv.config();
 connectDB();
 
