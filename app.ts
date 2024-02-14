@@ -4,6 +4,7 @@ import connectDB from './config/db';
 import userRoutes from './routes/userRoutes';
 import eventRoutes from './routes/eventsRouter';
 import adminRoutes from './routes/adminRoutes';
+import uploadProfile from './routes/uploadRoutes';
 import { createPermanentAdminUser } from './controllers/UserController';
 
 dotenv.config();
@@ -14,7 +15,7 @@ const PORT = process.env.PORT;
 
 app.use(express.json());
 
-app.use('/api/users', userRoutes);
+app.use('/api/users', userRoutes,uploadProfile);
 app.use('/api/', eventRoutes);
 app.use('/api/admin', adminRoutes);
 

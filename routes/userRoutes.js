@@ -16,4 +16,5 @@ router.post("/complete-profile-registration", AuthController_1.completeProfileRe
 // New route for fetching Membership ID
 // Assuming public access for demonstration; you might want to protect this route with authentication
 router.get("/membership-id/:userId", AuthController_1.getMembershipId);
+router.post('/change-password', AuthController_1.changePassword);
 exports.default = router;

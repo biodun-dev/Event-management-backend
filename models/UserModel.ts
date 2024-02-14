@@ -15,6 +15,7 @@ interface IUser extends Document {
   dob?: Date; // Existing field for date of birth
   membershipId?: string; // New field for membership ID
   role?: string;
+  profilePicture?: string;
 }
 
 const UserSchema = new Schema({
@@ -32,6 +33,7 @@ const UserSchema = new Schema({
   dob: { type: Date }, // Field for date of birth
   membershipId: { type: String, default: null }, // New field for membership ID
   role: { type: String, default: 'user' }, // Possible values: 'user', 'admin'
+  profilePicture: { type: String, required: false },
 }, { timestamps: true });
 
 export default model<IUser>('User', UserSchema);
