@@ -14,5 +14,7 @@ const UserSchema = new mongoose_1.Schema({
     registrationComplete: { type: Boolean, default: false },
     sex: { type: String }, // Field for sex
     dob: { type: Date }, // Field for date of birth
+    membershipId: { type: String, default: null }, // New field for membership ID
+    role: { type: String, default: 'user' }, // Possible values: 'user', 'admin'
 }, { timestamps: true });
 exports.default = (0, mongoose_1.model)('User', UserSchema);

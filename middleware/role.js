@@ -12,31 +12,26 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createPermanentAdminUser = void 0;
+exports.isAdmin = void 0;
+const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const UserModel_1 = __importDefault(require("../models/UserModel"));
-const bcryptjs_1 = __importDefault(require("bcryptjs"));
-const createPermanentAdminUser = () => __awaiter(void 0, void 0, void 0, function* () {
-    const adminEmail = 'admin@example.com'; // Use real admin email
-    const adminExists = yield UserModel_1.default.findOne({ email: adminEmail });
-    if (adminExists) {
-        console.log('Admin user already exists.');
-        return;
-    }
-    const adminPassword = 'SecureAdminPassword'; // Use a secure password
-    const hashedPassword = yield bcryptjs_1.default.hash(adminPassword, 10);
-    const adminUser = new UserModel_1.default({
-        username: 'admin',
-        email: adminEmail,
-        password: hashedPassword,
-        phoneNumber: '1234567890',
-        role: 'admin',
-    });
+const isAdmin = (req, res, next) => __awaiter(void 0, void 0, void 0, function* () {
+    var _a;
     try {
-        yield adminUser.save();
-        console.log('Admin user created successfully.');
+        const token = (_a = req.headers.authorization) === null || _a === void 0 ? void 0 : _a.split(' ')[1];
+        if (!token)
+            return res.status(403).json({ message: 'No token provided.' });
+        const decoded = jsonwebtoken_1.default.verify(token, process.env.JWT_SECRET);
+        const user = yield UserModel_1.default.findById(decoded.id);
+        if (user && user.role === 'admin') {
+            next();
+        }
+        else {
+            return res.status(403).json({ message: 'Require Admin Role!' });
+        }
     }
     catch (error) {
-        console.error('Error creating admin user:', error);
+        return res.status(401).json({ message: 'Unauthorized!' });
     }
 });
-exports.createPermanentAdminUser = createPermanentAdminUser;
+exports.isAdmin = isAdmin;
