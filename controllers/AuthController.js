@@ -19,6 +19,7 @@ const jsonwebtoken_1 = __importDefault(require("jsonwebtoken"));
 const mailer_1 = require("../utilis/mailer");
 const smsSender_1 = require("../utilis/smsSender");
 const generateOTP_1 = require("../utilis/generateOTP");
+const io = require('../app');
 const initiateRegistration = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { phoneNumber } = req.body;
     // Basic validation to ensure phoneNumber is provided
@@ -209,9 +210,14 @@ const completeProfileRegistration = (req, res) => __awaiter(void 0, void 0, void
         user.registrationComplete = true;
         user.membershipId = membershipId;
         yield user.save();
-        res
-            .status(200)
-            .json({ message: "Profile registration complete.", membershipId });
+        if (user.registrationComplete) {
+            // Emit an event to all connected clients
+            io.emit('profileRegistrationComplete', { membershipId: user.membershipId });
+            res.status(200).json({ message: "Profile registration complete.", membershipId });
+        }
+        else {
+            // Handle error or existing user logic
+        }
     }
     catch (error) {
         console.error(error);

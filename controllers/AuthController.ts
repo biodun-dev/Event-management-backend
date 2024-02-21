@@ -5,6 +5,7 @@ import jwt from "jsonwebtoken";
 import { sendEmail } from "../utilis/mailer";
 import { sendSMS } from "../utilis/smsSender";
 import { generateOTP } from "../utilis/generateOTP";
+const io = require('../app');
 
 interface IUser {
   _id: string; // Replace with the actual type of your user ID field (e.g., Types.ObjectId)
@@ -236,9 +237,13 @@ const completeProfileRegistration = async (req: Request, res: Response) => {
     user.membershipId = membershipId;
     await user.save();
 
-    res
-      .status(200)
-      .json({ message: "Profile registration complete.", membershipId });
+    if (user.registrationComplete) {
+      // Emit an event to all connected clients
+      io.emit('profileRegistrationComplete', { membershipId: user.membershipId });
+      res.status(200).json({ message: "Profile registration complete.", membershipId });
+    } else {
+      // Handle error or existing user logic
+    }
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: "Server error" });

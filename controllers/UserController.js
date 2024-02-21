@@ -15,39 +15,44 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.getAllRegisteredMembers = exports.getTotalRegisteredMembers = exports.findTopPerformingCenters = exports.findLowestCenter = exports.findHighestCenter = exports.getUserCount = exports.createPermanentAdminUser = void 0;
 const UserModel_1 = __importDefault(require("../models/UserModel"));
 const bcryptjs_1 = __importDefault(require("bcryptjs"));
+const socket_1 = require("../socket");
 const createPermanentAdminUser = () => __awaiter(void 0, void 0, void 0, function* () {
-    const adminEmail = 'admin@example.com'; // Use real admin email
+    const adminEmail = "admin@example.com"; // Use real admin email
     const adminExists = yield UserModel_1.default.findOne({ email: adminEmail });
     if (adminExists) {
-        console.log('Admin user already exists.');
+        console.log("Admin user already exists.");
         return;
     }
-    const adminPassword = 'SecureAdminPassword'; // Use a secure password
+    const adminPassword = "SecureAdminPassword"; // Use a secure password
     const hashedPassword = yield bcryptjs_1.default.hash(adminPassword, 10);
     const adminUser = new UserModel_1.default({
-        username: 'admin',
+        username: "admin",
         email: adminEmail,
         password: hashedPassword,
-        phoneNumber: '1234567890',
-        role: 'admin',
+        phoneNumber: "1234567890",
+        role: "admin",
     });
     try {
         yield adminUser.save();
-        console.log('Admin user created successfully.');
+        console.log("Admin user created successfully.");
     }
     catch (error) {
-        console.error('Error creating admin user:', error);
+        console.error("Error creating admin user:", error);
     }
 });
 exports.createPermanentAdminUser = createPermanentAdminUser;
-const getUserCount = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+const getUserCount = (_req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const count = yield UserModel_1.default.countDocuments();
+        // Get the Socket.IO instance
+        const io = (0, socket_1.getIo)();
+        // Emit an updated user count to all connected clients
+        io.emit("updateUserCount", { userCount: count });
         res.json({ userCount: count });
     }
     catch (error) {
         console.error(error);
-        res.status(500).json({ message: 'Server error' });
+        res.status(500).json({ message: "Server error" });
     }
 });
 exports.getUserCount = getUserCount;
@@ -55,14 +60,14 @@ const findHighestCenter = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield UserModel_1.default.aggregate([
             { $match: { nccCentre: { $ne: null } } }, // Match documents where nccCentre is not null
-            { $group: { _id: '$nccCentre', userCount: { $sum: 1 } } }, // Group by nccCentre and count users
+            { $group: { _id: "$nccCentre", userCount: { $sum: 1 } } }, // Group by nccCentre and count users
             { $sort: { userCount: -1 } }, // Sort groups by userCount in descending order
-            { $limit: 1 } // Limit to the highest center
+            { $limit: 1 }, // Limit to the highest center
         ]);
         return result;
     }
     catch (error) {
-        console.error('Error finding highest center:', error);
+        console.error("Error finding highest center:", error);
         throw error;
     }
 });
@@ -72,14 +77,14 @@ const findLowestCenter = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         const result = yield UserModel_1.default.aggregate([
             { $match: { nccCentre: { $ne: null } } },
-            { $group: { _id: '$nccCentre', userCount: { $sum: 1 } } },
+            { $group: { _id: "$nccCentre", userCount: { $sum: 1 } } },
             { $sort: { userCount: 1 } }, // Sort groups by userCount in ascending order
-            { $limit: 1 } // Limit to the lowest center
+            { $limit: 1 }, // Limit to the lowest center
         ]);
         return result;
     }
     catch (error) {
-        console.error('Error finding lowest center:', error);
+        console.error("Error finding lowest center:", error);
         throw error;
     }
 });
@@ -89,14 +94,14 @@ const findTopPerformingCenters = () => __awaiter(void 0, void 0, void 0, functio
     try {
         const topCenters = yield UserModel_1.default.aggregate([
             { $match: { nccCentre: { $ne: null } } }, // Match documents where nccCentre is not null
-            { $group: { _id: '$nccCentre', userCount: { $sum: 1 } } }, // Group by nccCentre and count users
+            { $group: { _id: "$nccCentre", userCount: { $sum: 1 } } }, // Group by nccCentre and count users
             { $sort: { userCount: -1 } }, // Sort groups by userCount in descending order
-            { $limit: 5 } // Limit to the top 5 centers
+            { $limit: 5 }, // Limit to the top 5 centers
         ]);
         return topCenters;
     }
     catch (error) {
-        console.error('Error finding top performing centers:', error);
+        console.error("Error finding top performing centers:", error);
         throw error;
     }
 });
@@ -107,7 +112,7 @@ const getTotalRegisteredMembers = () => __awaiter(void 0, void 0, void 0, functi
         return totalMembers;
     }
     catch (error) {
-        console.error('Error fetching total registered members:', error);
+        console.error("Error fetching total registered members:", error);
         throw error;
     }
 });
@@ -116,11 +121,11 @@ exports.getTotalRegisteredMembers = getTotalRegisteredMembers;
 const getAllRegisteredMembers = () => __awaiter(void 0, void 0, void 0, function* () {
     try {
         // Select only the fields you want to expose, excluding sensitive fields like password
-        const members = yield UserModel_1.default.find({}, '-password -otp -otpExpires');
+        const members = yield UserModel_1.default.find({}, "-password -otp -otpExpires");
         return members;
     }
     catch (error) {
-        console.error('Error fetching registered members:', error);
+        console.error("Error fetching registered members:", error);
         throw error;
     }
 });

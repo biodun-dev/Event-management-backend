@@ -6,13 +6,17 @@ import eventRoutes from './routes/eventsRouter';
 import adminRoutes from './routes/adminRoutes';
 import uploadProfile from './routes/uploadRoutes';
 import { createPermanentAdminUser } from './controllers/UserController';
-
+import http = require('http');
+import { initIo } from './socket';
 
 dotenv.config();
 connectDB();
 
-const app = express();
+
 const PORT = process.env.PORT;
+const app = express();
+const server = http.createServer(app);
+initIo(server);
 
 app.use(express.json());
 
@@ -22,4 +26,5 @@ app.use('/api/admin', adminRoutes);
 
 createPermanentAdminUser();
 
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+
+server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
