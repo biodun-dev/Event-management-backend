@@ -16,10 +16,10 @@ import {
 import authenticateToken from "../middleware/authenticateToken";
 
 // Example admin route
-router.get("/all-users", authenticateToken, async (req, res) => {
+router.get("/all-users",  async (req, res) => {
   // Logic to list all users
 });
-router.get("/user-count", getUserCount);
+router.get("/user-count",isAdmin, getUserCount);
 // Route for fetching the center with the highest number of users
 router.get("/centers/highest", async (req, res) => {
   try {

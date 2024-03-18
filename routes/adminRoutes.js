@@ -14,14 +14,14 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const express_1 = __importDefault(require("express"));
 const router = express_1.default.Router();
+const role_1 = require("../middleware/role");
 const UserController_1 = require("../controllers/UserController");
 const UserController_2 = require("../controllers/UserController");
-const authenticateToken_1 = __importDefault(require("../middleware/authenticateToken"));
 // Example admin route
-router.get("/all-users", authenticateToken_1.default, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+router.get("/all-users", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     // Logic to list all users
 }));
-router.get("/user-count", UserController_1.getUserCount);
+router.get("/user-count", role_1.isAdmin, UserController_1.getUserCount);
 // Route for fetching the center with the highest number of users
 router.get("/centers/highest", (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {

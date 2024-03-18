@@ -19,19 +19,23 @@ const notification_1 = __importDefault(require("../models/notification"));
 // Other controller methods...
 const createEvent = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     try {
-        const event = new events_1.default(req.body);
+        // Assuming the middleware adds a user object to the req
+        // Make sure your user object has an _id or equivalent property
+        if (!req.user || !req.user.id) {
+            return res.status(400).json({ message: 'User information is missing from the request' });
+        }
+        const event = new events_1.default(Object.assign(Object.assign({}, req.body), { userId: req.user.id // Use the userId from the authenticated user
+         }));
         yield event.save();
         // Create a notification document in the database
         const notification = new notification_1.default({
-            user: req.body.userId,
-            event: event._id,
+            user: req.user.id, // Use the userId from the authenticated user
+            event: event.id,
             message: `Reminder: The event ${event.name} is happening next week!`,
-            deviceToken: req.body.deviceToken,
+            deviceToken: req.body.deviceToken, // Assuming you still get this from the request body
             dateToSend: new Date(), // Immediate sending for this example
         });
         yield notification.save();
-        // // Send the notification using the saved document's ID
-        // await sendNotification(notification._id.toString());
         return res.status(201).json({ event, notification: 'Notification scheduled.' });
     }
     catch (error) {

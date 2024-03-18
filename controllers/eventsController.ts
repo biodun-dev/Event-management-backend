@@ -6,31 +6,36 @@ import NotificationModel from '../models/notification';
 // Other controller methods...
 const createEvent = async (req: Request, res: Response): Promise<Response> => {
   try {
-    const event = new EventModel(req.body);
+    // Assuming the middleware adds a user object to the req
+    // Make sure your user object has an _id or equivalent property
+    if (!req.user || !req.user.id) {
+      return res.status(400).json({ message: 'User information is missing from the request' });
+    }
+
+    const event = new EventModel({
+      ...req.body,
+      userId: req.user.id // Use the userId from the authenticated user
+    });
+
     await event.save();
 
     // Create a notification document in the database
     const notification = new NotificationModel({
-      user: req.body.userId,
-      event: event._id,
+      user: req.user.id, // Use the userId from the authenticated user
+      event: event.id,
       message: `Reminder: The event ${event.name} is happening next week!`,
-      deviceToken: req.body.deviceToken,
+      deviceToken: req.body.deviceToken, // Assuming you still get this from the request body
       dateToSend: new Date(), // Immediate sending for this example
     });
 
     await notification.save();
 
-    // // Send the notification using the saved document's ID
-    // await sendNotification(notification._id.toString());
-
     return res.status(201).json({ event, notification: 'Notification scheduled.' });
   } catch (error) {
     console.error(error);
-    return res.status(500).json({ message: 'Error creating event',   error: (error as Error).message });
+    return res.status(500).json({ message: 'Error creating event', error: (error as Error).message });
   }
 };
-
-
 
 
 

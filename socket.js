@@ -55,7 +55,7 @@ const initIo = (server) => {
                 // Optionally, fetch and emit all registered members
                 // Consider the performance impact and necessity of this operation
                 const members = yield (0, UserController_1.getAllRegisteredMembers)();
-                socket.emit("allRegisteredMembers", members);
+                socket.emit("allRegisteredMembers", { members });
             }
             catch (error) {
                 console.error("Failed to fetch aggregated data:", error);

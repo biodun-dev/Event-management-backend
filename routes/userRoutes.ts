@@ -18,7 +18,7 @@ const router = express.Router();
 router.post("/initiate-registration", initiateRegistration);
 router.post("/add-email-request-otp", addEmailAndRequestOTP);
 router.post("/verify-otp-set-password", verifyOTPAndSetPassword);
-router.post("/login", login);
+router.post("/login",login);
 router.post("/resend-otp", resendOTP);
 router.post("/complete-profile-registration", completeProfileRegistration);
 
