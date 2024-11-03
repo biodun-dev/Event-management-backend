@@ -9,7 +9,7 @@ const sendSMS = async (to: string, body: string) => {
   try {
     const message = await client.messages.create({
       body: body,
-      from: process.env.TWILIO_PHONE_NUMBER, // Your Twilio phone number
+      from: process.env.TWILIO_PHONE_NUMBER,
       to: to,
     });
 
