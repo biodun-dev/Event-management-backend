@@ -3,9 +3,8 @@ import bcrypt from "bcryptjs";
 import { Request, Response } from "express";
 import { getIo } from "../socket";
 
-
 export const createPermanentAdminUser = async () => {
-  const adminEmail = "admin@example.com"; // Use real admin email
+  const adminEmail = "admin@example.com";
   const adminExists = await UserModel.findOne({ email: adminEmail });
 
   if (adminExists) {
@@ -13,7 +12,7 @@ export const createPermanentAdminUser = async () => {
     return;
   }
 
-  const adminPassword = "SecureAdminPassword"; // Use a secure password
+  const adminPassword = "SecureAdminPassword";
   const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
   const adminUser = new UserModel({
@@ -38,9 +37,7 @@ export const getUserCount = async (
 ): Promise<void> => {
   try {
     const count = await UserModel.countDocuments();
-    // Get the Socket.IO instance
     const io = getIo();
-    // Emit an updated user count to all connected clients
     io.emit("updateUserCount", { userCount: count });
     res.json({ userCount: count });
   } catch (error) {
@@ -52,10 +49,10 @@ export const getUserCount = async (
 export const findHighestCenter = async () => {
   try {
     const result = await UserModel.aggregate([
-      { $match: { nccCentre: { $ne: null } } }, // Match documents where nccCentre is not null
-      { $group: { _id: "$nccCentre", userCount: { $sum: 1 } } }, // Group by nccCentre and count users
-      { $sort: { userCount: -1 } }, // Sort groups by userCount in descending order
-      { $limit: 1 }, // Limit to the highest center
+      { $match: { nccCentre: { $ne: null } } },
+      { $group: { _id: "$nccCentre", userCount: { $sum: 1 } } },
+      { $sort: { userCount: -1 } },
+      { $limit: 1 },
     ]);
 
     return result;
@@ -65,14 +62,13 @@ export const findHighestCenter = async () => {
   }
 };
 
-// Function to find the center with the lowest number of users
 export const findLowestCenter = async () => {
   try {
     const result = await UserModel.aggregate([
       { $match: { nccCentre: { $ne: null } } },
       { $group: { _id: "$nccCentre", userCount: { $sum: 1 } } },
-      { $sort: { userCount: 1 } }, // Sort groups by userCount in ascending order
-      { $limit: 1 }, // Limit to the lowest center
+      { $sort: { userCount: 1 } },
+      { $limit: 1 },
     ]);
 
     return result;
@@ -82,14 +78,13 @@ export const findLowestCenter = async () => {
   }
 };
 
-// Function to find the top 5 performing centers
 export const findTopPerformingCenters = async () => {
   try {
     const topCenters = await UserModel.aggregate([
-      { $match: { nccCentre: { $ne: null } } }, // Match documents where nccCentre is not null
-      { $group: { _id: "$nccCentre", userCount: { $sum: 1 } } }, // Group by nccCentre and count users
-      { $sort: { userCount: -1 } }, // Sort groups by userCount in descending order
-      { $limit: 5 }, // Limit to the top 5 centers
+      { $match: { nccCentre: { $ne: null } } },
+      { $group: { _id: "$nccCentre", userCount: { $sum: 1 } } },
+      { $sort: { userCount: -1 } },
+      { $limit: 5 },
     ]);
 
     return topCenters;
@@ -109,10 +104,8 @@ export const getTotalRegisteredMembers = async () => {
   }
 };
 
-//Function to get all registered members
 export const getAllRegisteredMembers = async () => {
   try {
-    // Select only the fields you want to expose, excluding sensitive fields like password
     const members = await UserModel.find({}, "-password -otp -otpExpires");
     return members;
   } catch (error) {

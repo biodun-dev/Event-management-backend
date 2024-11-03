@@ -3,29 +3,25 @@ import EventModel from '../models/events';
 import NotificationModel from '../models/notification';
 // import { sendNotification } from '../utilis/notificationServices';
 
-// Other controller methods...
 const createEvent = async (req: Request, res: Response): Promise<Response> => {
   try {
-    // Assuming the middleware adds a user object to the req
-    // Make sure your user object has an _id or equivalent property
     if (!req.user || !req.user.id) {
       return res.status(400).json({ message: 'User information is missing from the request' });
     }
 
     const event = new EventModel({
       ...req.body,
-      userId: req.user.id // Use the userId from the authenticated user
+      userId: req.user.id
     });
 
     await event.save();
 
-    // Create a notification document in the database
     const notification = new NotificationModel({
-      user: req.user.id, // Use the userId from the authenticated user
+      user: req.user.id, 
       event: event.id,
       message: `Reminder: The event ${event.name} is happening next week!`,
-      deviceToken: req.body.deviceToken, // Assuming you still get this from the request body
-      dateToSend: new Date(), // Immediate sending for this example
+      deviceToken: req.body.deviceToken, 
+      dateToSend: new Date(),
     });
 
     await notification.save();
@@ -40,7 +36,6 @@ const createEvent = async (req: Request, res: Response): Promise<Response> => {
 
 
 
-// Controller to list events for the calendar
 const listCalendarEvents = async (req: Request, res: Response) => {
   try {
     const events = await EventModel.find();
@@ -50,7 +45,6 @@ const listCalendarEvents = async (req: Request, res: Response) => {
   }
 };
 
-// Controller to list upcoming events
 const listUpcomingEvents = async (req: Request, res: Response) => {
   try {
     const upcomingEvents = await EventModel.find({ startDate: { $gte: new Date() } }).sort({ startDate: 1 });
@@ -60,7 +54,6 @@ const listUpcomingEvents = async (req: Request, res: Response) => {
   }
 };
 
-// Controller to get live events
 const listLiveEvents = async (req: Request, res: Response) => {
   try {
     const liveEvents = await EventModel.find({ isLive: true });

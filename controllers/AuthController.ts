@@ -5,10 +5,10 @@ import jwt from "jsonwebtoken";
 import { sendEmail } from "../utilis/mailer";
 import { sendSMS } from "../utilis/smsSender";
 import { generateOTP } from "../utilis/generateOTP";
-const io = require('../app');
+const io = require("../app");
 
 interface IUser {
-  _id: string; // Replace with the actual type of your user ID field (e.g., Types.ObjectId)
+  _id: string;
   username: string;
   email: string;
   password: string;
@@ -19,7 +19,6 @@ interface IUser {
 const initiateRegistration = async (req: Request, res: Response) => {
   const { phoneNumber } = req.body;
 
-  // Basic validation to ensure phoneNumber is provided
   if (!phoneNumber) {
     return res.status(400).json({ message: "Phone number is required" });
   }
@@ -27,18 +26,15 @@ const initiateRegistration = async (req: Request, res: Response) => {
   try {
     let user = await UserModel.findOne({ phoneNumber });
 
-    // Check if the phone number is already registered
     if (user) {
       return res
         .status(400)
         .json({ message: "Phone number already registered" });
     }
 
-    // Create a user with just the phone number
     user = new UserModel({ phoneNumber });
     await user.save();
 
-    // Successfully registered the phone number
     res
       .status(201)
       .json({ message: "Phone number registered, proceed to enter email" });
@@ -48,7 +44,6 @@ const initiateRegistration = async (req: Request, res: Response) => {
   }
 };
 
-// Step 2: Add email to user and request OTP
 const addEmailAndRequestOTP = async (req: Request, res: Response) => {
   const { phoneNumber, email } = req.body;
 
@@ -67,8 +62,7 @@ const addEmailAndRequestOTP = async (req: Request, res: Response) => {
         .json({ message: "Email already added, request OTP directly" });
     }
 
-    // Set the email only if it's provided, otherwise, skip setting it to avoid null values
-    user.email = email.trim(); // Ensure we don't just have whitespace
+    user.email = email.trim();
 
     const otp = generateOTP();
     const otpExpires = new Date();
@@ -76,7 +70,7 @@ const addEmailAndRequestOTP = async (req: Request, res: Response) => {
     user.otp = otp;
     user.otpExpires = otpExpires;
     await user.save();
-    // Send OTP to both email and phone
+
     await sendEmail(email, "Your OTP", `Your OTP is: ${otp}`);
     await sendSMS(phoneNumber, `Your OTP is: ${otp}`);
     res
@@ -88,7 +82,6 @@ const addEmailAndRequestOTP = async (req: Request, res: Response) => {
   }
 };
 
-// Step 3: Verify OTP and allow setting of password
 const verifyOTPAndSetPassword = async (req: Request, res: Response) => {
   const { email, otp, password } = req.body;
   try {
@@ -119,42 +112,34 @@ const login = async (req: Request, res: Response) => {
     const user = await UserModel.findOne({ email });
 
     if (!user) {
-      // User not found
       return res.status(400).json({ message: "User not found" });
     }
 
-    // Ensure the user has a password set (it should not be undefined)
     if (user.password === undefined) {
-      // This case should technically never occur if your data integrity is good
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Now we can safely assert that `user.password` is a string since we checked it's not undefined
     const isPasswordValid = await bcrypt.compare(
       password,
       user.password as string
     );
 
     if (!isPasswordValid) {
-      // Invalid password
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    // Assuming the role checking and JWT creation logic remains the same
     if (user.role !== "admin" && user.role !== "user") {
-      // If the role is neither 'admin' nor 'user'
       return res
         .status(403)
         .json({ message: "Access Denied: Unauthorized role" });
     }
 
     const token = jwt.sign(
-      { id: user._id, role: user.role }, // Including user role in the token payload
+      { id: user._id, role: user.role },
       process.env.JWT_SECRET as string,
       { expiresIn: "1h" }
     );
 
-    // Respond with token and possibly user role
     res.json({ token, role: user.role });
   } catch (error) {
     console.error(error);
@@ -171,23 +156,19 @@ const resendOTP = async (req: Request, res: Response) => {
       return res.status(400).json({ message: "User not found." });
     }
 
-    // Check if the OTP has expired (optional, depends on your business logic)
     if (user.otpExpires && user.otpExpires < new Date()) {
       return res.status(400).json({ message: "OTP has expired." });
     }
 
-    // Generate a new OTP and update the expiration time
     const otp = generateOTP();
     const otpExpires = new Date();
-    otpExpires.setMinutes(otpExpires.getMinutes() + 10); // Set OTP expiration time
+    otpExpires.setMinutes(otpExpires.getMinutes() + 10);
 
     user.otp = otp;
     user.otpExpires = otpExpires;
     await user.save();
 
-    // Resend OTP to email and phone
     await sendEmail(email, "Your OTP", `Your OTP is: ${otp}`);
-    // Assuming you have the phone number associated with the user
     await sendSMS(user.phoneNumber, `Your OTP is: ${otp}`);
 
     res
@@ -198,7 +179,6 @@ const resendOTP = async (req: Request, res: Response) => {
     res.status(500).json({ message: "Server error" });
   }
 };
-// Step 4: Complete Profile Registration
 const completeProfileRegistration = async (req: Request, res: Response) => {
   const { phoneNumber, firstName, lastName, nccCentre, sex, dob } = req.body;
   try {
@@ -212,15 +192,12 @@ const completeProfileRegistration = async (req: Request, res: Response) => {
         .json({ message: "User profile already completed" });
     }
 
-    // Simulate a unique sequence number for the user.
     const sequenceNumber = (await UserModel.countDocuments()) + 1;
-    const sequenceStr = sequenceNumber.toString().padStart(3, "0"); // Ensure it is at least three digits
+    const sequenceStr = sequenceNumber.toString().padStart(3, "0");
 
-    // Lowercase and replace spaces with dashes for the centre code part, if necessary
-    const centreCode = nccCentre.toLowerCase().replace(/\s+/g, "-"); // Assuming 'ilupeju' is the desired format
+    const centreCode = nccCentre.toLowerCase().replace(/\s+/g, "-");
 
     const date = new Date();
-    // Format the date as MMYYYY for full year representation
     const timestamp =
       (date.getMonth() + 1).toString().padStart(2, "0") +
       date.getFullYear().toString();
@@ -238,11 +215,13 @@ const completeProfileRegistration = async (req: Request, res: Response) => {
     await user.save();
 
     if (user.registrationComplete) {
-      // Emit an event to all connected clients
-      io.emit('profileRegistrationComplete', { membershipId: user.membershipId });
-      res.status(200).json({ message: "Profile registration complete.", membershipId });
+      io.emit("profileRegistrationComplete", {
+        membershipId: user.membershipId,
+      });
+      res
+        .status(200)
+        .json({ message: "Profile registration complete.", membershipId });
     } else {
-      // Handle error or existing user logic
     }
   } catch (error) {
     console.error(error);
@@ -250,7 +229,6 @@ const completeProfileRegistration = async (req: Request, res: Response) => {
   }
 };
 
-// Fetch Membership ID by User ID
 const getMembershipId = async (req: Request, res: Response) => {
   const { userId } = req.params;
   try {
@@ -269,7 +247,6 @@ const getMembershipId = async (req: Request, res: Response) => {
 const changePassword = async (req: Request, res: Response) => {
   const { email, currentPassword, newPassword } = req.body;
 
-  // Basic validation
   if (!email || !currentPassword || !newPassword) {
     return res.status(400).json({ message: "All fields are required" });
   }
@@ -280,12 +257,12 @@ const changePassword = async (req: Request, res: Response) => {
       return res.status(404).json({ message: "User not found" });
     }
 
-    // Ensure the user has a password set
     if (user.password === undefined) {
-      return res.status(400).json({ message: "User does not have a password set" });
+      return res
+        .status(400)
+        .json({ message: "User does not have a password set" });
     }
 
-    // Now we can safely pass user.password to bcrypt.compare
     const isMatch = await bcrypt.compare(currentPassword, user.password);
     if (!isMatch) {
       return res.status(400).json({ message: "Incorrect current password" });
@@ -302,7 +279,6 @@ const changePassword = async (req: Request, res: Response) => {
   }
 };
 
-
 export {
   login,
   resendOTP,
@@ -311,5 +287,5 @@ export {
   verifyOTPAndSetPassword,
   completeProfileRegistration,
   getMembershipId,
-  changePassword 
+  changePassword,
 };
