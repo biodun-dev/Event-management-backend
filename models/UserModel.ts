@@ -11,9 +11,9 @@ interface IUser extends Document {
   otp: string | null;
   otpExpires: Date | null;
   registrationComplete?: boolean;
-  sex?: string; // Existing field for sex
-  dob?: Date; // Existing field for date of birth
-  membershipId?: string; // New field for membership ID
+  sex?: string;
+  dob?: Date; 
+  membershipId?: string; 
   role?: string;
   profilePicture?: string;
 }
@@ -29,10 +29,10 @@ const UserSchema = new Schema({
   otp: { type: String, default: null },
   otpExpires: { type: Date, default: null },
   registrationComplete: { type: Boolean, default: false },
-  sex: { type: String }, // Field for sex
-  dob: { type: Date }, // Field for date of birth
-  membershipId: { type: String, default: null }, // New field for membership ID
-  role: { type: String, default: 'user' }, // Possible values: 'user', 'admin'
+  sex: { type: String },
+  dob: { type: Date }, 
+  membershipId: { type: String, default: null }, 
+  role: { type: String, default: 'user' }, 
   profilePicture: { type: String, required: false },
 }, { timestamps: true });
 
