@@ -33,27 +33,23 @@ export const initIo = (server: HttpServer) => {
             }
         };
 
-        // Function to emit various aggregated data
         const emitAggregatedData = async () => {
             try {
-                // Fetch and emit the highest center
                 const highestCenter = await findHighestCenter();
                 socket.emit("highestCenter", highestCenter);
 
-                // Fetch and emit the lowest center
+
                 const lowestCenter = await findLowestCenter();
                 socket.emit("lowestCenter", lowestCenter);
 
-                // Fetch and emit the top 5 performing centers
+
                 const topCenters = await findTopPerformingCenters();
                 socket.emit("topPerformingCenters", topCenters);
 
-                // Fetch and emit the total registered members
                 const totalMembers = await getTotalRegisteredMembers();
                 socket.emit("totalRegisteredMembers", { totalMembers });
 
-                // Optionally, fetch and emit all registered members
-                // Consider the performance impact and necessity of this operation
+
                  const members = await getAllRegisteredMembers();
                  socket.emit("allRegisteredMembers",{ members});
             } catch (error) {
@@ -61,7 +57,6 @@ export const initIo = (server: HttpServer) => {
             }
         };
 
-        // Emit all data upon connection
         await emitUserCount();
         await emitAggregatedData();
 
@@ -78,4 +73,3 @@ export const getIo = (): SocketIOServer => {
     return io;
 };
 
-// Implement the aggregation functions here, as you've defined them previously
